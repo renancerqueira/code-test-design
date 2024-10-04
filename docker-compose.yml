@@ -1,0 +1,60 @@
+version: '3'
+services:
+  # Serviço do banco de dados PostgreSQL
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: exam_db
+    ports:
+      - "5432:5432" # Mapeando a porta do PostgreSQL para o host
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persistência de dados
+    networks:
+      - exam-network # Rede para comunicação com outros serviços
+
+  # Serviço do enrollment-service
+  enrollment-service:
+    build: ./enrollment-service
+    ports:
+      - "3000:3000" # Porta onde o enrollment-service vai rodar
+    environment:
+      DATABASE_HOST: postgres # O nome do serviço do PostgreSQL
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: exam_db
+    depends_on:
+      - postgres # Garantir que o PostgreSQL esteja pronto antes de subir o serviço
+    networks:
+      - exam-network # Rede para comunicação com outros serviços
+    volumes:
+      - ./enrollment-service:/usr/src/app # Montar o diretório do código no contêiner
+
+  # Serviço do exam-service
+  exam-service:
+    build: ./exam-service
+    ports:
+      - "3001:3001" # Porta onde o exam-service vai rodar
+    environment:
+      DATABASE_HOST: postgres # O nome do serviço do PostgreSQL
+      DATABASE_PORT: 5432
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: password
+      DATABASE_NAME: exam_db
+    depends_on:
+      - postgres # Garantir que o PostgreSQL esteja pronto antes de subir o serviço
+    networks:
+      - exam-network # Rede para comunicação com outros serviços
+    volumes:
+      - ./exam-service:/usr/src/app # Montar o diretório do código no contêiner
+
+# Definição de volumes para persistência de dados do PostgreSQL
+volumes:
+  postgres_data:
+
+# Rede que os serviços vão compartilhar
+networks:
+  exam-network:
+    driver: bridge
