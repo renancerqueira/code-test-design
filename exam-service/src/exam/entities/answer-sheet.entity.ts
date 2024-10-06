@@ -1,3 +1,4 @@
+import { Status } from 'src/common/enums/status.enum';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
@@ -19,10 +20,10 @@ export class AnswerSheet {
 
   @Column({
     type: 'enum',
-    enum: ['NOT_STARTED', 'STARTED', 'SUBMITTED'],
-    default: 'NOT_STARTED',
+    enum: Status,
+    default: Status.NOT_STARTED,
   })
-  status: 'NOT_STARTED' | 'STARTED' | 'SUBMITTED';
+  status: Status;
 
   @Column({ nullable: true })
   startedAt: Date;
