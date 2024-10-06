@@ -1,14 +1,23 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Param } from '@nestjs/common';
 import { ExamService } from '../services/exam.service';
-import { CreateAnswerSheetDto } from '../dto/create-answer-sheet.dto';
-import { AnswerSheet } from '../entities/answer-sheet.entity';
+import { StartExamResponseDto } from '../dto/start-exam-response.dto';
+import { ApiTags, ApiResponse, ApiParam } from '@nestjs/swagger';
+import * as moment from 'moment';
 
-@Controller('exam')
+@ApiTags('exam')
+@Controller('start')
 export class ExamController {
   constructor(private readonly examService: ExamService) {}
 
-  @Post('start')
-  async createAnswerSheet(@Body() createAnswerSheetDto: CreateAnswerSheetDto): Promise<AnswerSheet> {
-    return this.examService.createAnswerSheet(createAnswerSheetDto);
+  @Post(':answerSheetId')
+  @ApiResponse({ status: 200, description: 'Exame iniciado com sucesso', type: StartExamResponseDto })
+  @ApiParam({ name: 'answerSheetId', description: 'UUID da AnswerSheet' })
+  async startExam(@Param('answerSheetId') answerSheetId: string): Promise<StartExamResponseDto> {
+    const start = moment();
+    const result = await this.examService.startExam(answerSheetId);
+    const end = moment();
+    const duration = end.diff(start, 'milliseconds');
+    console.log(`Exam Controller time: ${duration}ms`);
+    return result;
   }
 }

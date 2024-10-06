@@ -1,5 +1,6 @@
 version: '3'
 services:
+
   # Serviço do banco de dados PostgreSQL
   postgres:
     image: postgres:13
@@ -28,23 +29,47 @@ services:
     depends_on:
       - postgres # Garantir que o PostgreSQL esteja pronto antes de subir o serviço
     networks:
-      - exam-network # Rede para comunicação com outros serviços
+      - exam-network
     volumes:
       - ./enrollment-service:/usr/src/app # Montar o diretório do código no contêiner
+
+  # Serviço do exam-packing-service
+  exam-packing-service:
+    build: ./exam-packing-service
+    ports:
+      - "3123:3123"
+    networks:
+      - exam-network # Rede para comunicação com outros serviços
+    volumes:
+      - ./exam-packing-service:/usr/src/app # Montar o diretório do código no contêiner
+
+  # Serviço do cache Redis
+  redis:
+    image: redis:6
+    ports:
+      - "6379:6379" # Porta padrão do Redis
+    networks:
+      - exam-network
 
   # Serviço do exam-service
   exam-service:
     build: ./exam-service
     ports:
-      - "3001:3001" # Porta onde o exam-service vai rodar
+      - "3001:3000" # Porta onde o exam-service vai rodar
     environment:
       DATABASE_HOST: postgres # O nome do serviço do PostgreSQL
       DATABASE_PORT: 5432
       DATABASE_USER: postgres
       DATABASE_PASSWORD: password
       DATABASE_NAME: exam_db
+      EXAM_PACKING_SERVICE_URL: http://exam-packing-service:3123
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_TTL: 9000000 # Estimei 2,5 horas considerando tempo de cheeckin e duração da prova
     depends_on:
       - postgres # Garantir que o PostgreSQL esteja pronto antes de subir o serviço
+      - redis # Garantir que o Redis esteja pronto antes de subir o serviço
+      - exam-packing-service # Depende do exam-packing-service
     networks:
       - exam-network # Rede para comunicação com outros serviços
     volumes:
