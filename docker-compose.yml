@@ -30,8 +30,6 @@ services:
       - postgres # Garantir que o PostgreSQL esteja pronto antes de subir o serviço
     networks:
       - exam-network
-    volumes:
-      - ./enrollment-service:/usr/src/app # Montar o diretório do código no contêiner
 
   # Serviço do exam-packing-service
   exam-packing-service:
@@ -72,8 +70,6 @@ services:
       - exam-packing-service # Depende do exam-packing-service
     networks:
       - exam-network # Rede para comunicação com outros serviços
-    volumes:
-      - ./exam-service:/usr/src/app # Montar o diretório do código no contêiner
 
 # Definição de volumes para persistência de dados do PostgreSQL
 volumes:

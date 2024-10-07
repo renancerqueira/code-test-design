@@ -9,11 +9,11 @@ import { GlobalCacheModule } from './common/modules/global-cache.module';
     ConfigModule.forRoot(),  // Habilitar o uso de variáveis de ambiente
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.DATABASE_HOST,
+      host: process.env.DATABASE_HOST || 'localhost',
       port: parseInt(process.env.DATABASE_PORT, 10) || 5432,
-      username: process.env.DATABASE_USER,
-      password: process.env.DATABASE_PASSWORD,
-      database: process.env.DATABASE_NAME,
+      username: process.env.DATABASE_USER || 'postgres',
+      password: process.env.DATABASE_PASSWORD || 'password',
+      database: process.env.DATABASE_NAME || 'exam_db',
       autoLoadEntities: true,
       synchronize: true, // Definir como "false" em produção
     }),
