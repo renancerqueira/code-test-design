@@ -23,8 +23,8 @@ export class ExamService {
         id: answerSheetId,
         status: Status.STARTED,
         startedAt: new Date(),
-        candidateId: UUID.generate(),
-        formId: UUID.generate()
+        candidateId: UUID.generate(), // Aqui poderia ser o id do usuário logado
+        formId: UUID.generate() // Aqui poderia ser o id do formulário do usuário, recuperado no banco ou em algum outro serviço pelo id do usuário
       });
       answerSheet = await this.answerSheetRepository.save(newAnswerSheet);
     } else if (answerSheet.status === Status.NOT_STARTED) {
