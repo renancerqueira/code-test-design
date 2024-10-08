@@ -30,4 +30,20 @@ export class AnswerSheet {
 
   @Column({ nullable: true })
   submittedAt: Date;
+
+  // Construtor básico
+  constructor(candidateId: string, formId: string) {
+    this.candidateId = candidateId;
+    this.formId = formId;
+    this.status = Status.NOT_STARTED;
+  }
+
+  // Método para iniciar
+  start() {
+    if (this.status !== Status.NOT_STARTED) {
+      throw new Error('Cannot start an AnswerSheet that has already been started or completed.');
+    }
+    this.status = Status.STARTED;
+    this.startedAt = new Date();
+  }
 }

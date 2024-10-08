@@ -19,23 +19,28 @@ export class ExamService {
     let answerSheet = await this.answerSheetRepository.findOne({ where: { id: answerSheetId } });
     
     if (!answerSheet) {
-      const newAnswerSheet = this.answerSheetRepository.create({
-        id: answerSheetId,
-        status: Status.STARTED,
-        startedAt: new Date(),
-        candidateId: UUID.generate(), // Aqui poderia ser o id do usuário logado
-        formId: UUID.generate() // Aqui poderia ser o id do formulário do usuário, recuperado no banco ou em algum outro serviço pelo id do usuário
-      });
-      answerSheet = await this.answerSheetRepository.save(newAnswerSheet);
+      answerSheet = await this.createNewAnswerSheet();
     } else if (answerSheet.status === Status.NOT_STARTED) {
-      answerSheet.status = Status.STARTED;
-      answerSheet.startedAt = new Date();
-      await this.answerSheetRepository.save(answerSheet);
+      answerSheet = await this.startExistingAnswerSheet(answerSheet);
     }
 
     // Usando o client para obter o conteúdo do exame
     const content = await this.examPackingClient.generateExamContent(answerSheet.formId);
 
     return { content };
+  }
+
+  private async createNewAnswerSheet(): Promise<AnswerSheet> {
+    const candidateId = UUID.generate(); // Id do usuário logado
+    const formId = UUID.generate(); // Id do formulário recuperado de outro serviço
+    
+    const newAnswerSheet = this.answerSheetRepository.create(new AnswerSheet(candidateId, formId));
+
+    return this.startExistingAnswerSheet(newAnswerSheet);
+  }
+
+  private async startExistingAnswerSheet(answerSheet: AnswerSheet): Promise<AnswerSheet> {
+    answerSheet.start();
+    return await this.answerSheetRepository.save(answerSheet);
   }
 }
